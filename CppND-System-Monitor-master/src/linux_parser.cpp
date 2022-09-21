@@ -154,6 +154,7 @@ long LinuxParser::Jiffies() {
 
 
 long LinuxParser::ActiveJiffies(int pid) {
+  long TotalTime;
   std::stringstream filename;
   filename << kProcDirectory << "/" << pid << "/" << kStatFilename;
   std::ifstream filestream(filename.str());
@@ -171,9 +172,10 @@ long LinuxParser::ActiveJiffies(int pid) {
       linestream >> utime >> stime >> cutime >> cstime ;
       for(int i = 0; i < 4; i++) linestream >> ignore;
       linestream >> starttime;
+      TotalTime = utime + stime + cutime + cstime +starttime;
       return utime + stime + cutime + cstime +starttime;
   }
-  return upTime; 
+  return TotalTime; 
   }
   
   LinuxParser::CpuProcessInfo LinuxParser::GetProcessCpuInfo(int pid) {
