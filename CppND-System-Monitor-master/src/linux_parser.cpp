@@ -154,7 +154,7 @@ long LinuxParser::Jiffies() {
 
 
 long LinuxParser::ActiveJiffies(int pid) {
-  long TotalTime;
+  long TotalTime = 0;
   std::stringstream filename;
   filename << kProcDirectory << "/" << pid << "/" << kStatFilename;
   std::ifstream filestream(filename.str());
@@ -246,11 +246,7 @@ long LinuxParser::IdleJiffies() {
       long guess;
       long guessnice; 
       linestream >> cpu >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guess >> guessnice;
-      long totalUserTime = user - guess;
-      long totalNiceTime = nice - guessnice;
       long totalIdleTime = idle + iowait;
-      long totalSystem = system + irq + softirq;
-      long totalVirtualTime = guess + guessnice;
       return totalIdleTime;
   }
   return 0;
@@ -276,15 +272,12 @@ vector<LinuxParser::CpuKPI> LinuxParser::CpuUtilPercentage() {
           long guessnice; 
           linestream >> cpu >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guess >> guessnice;
           if (cpu.substr(0,3) != "cpu")
-              return returnVector;
-          
+              return returnVector; 
           long totalIdleTime = idle + iowait;
-          long totalNoIdleTime = user + nice + system + irq + softirq;
-          
+          long totalNoIdleTime = user + nice + system + irq + softirq;       
           CpuKPI current;
           current.idleTime = totalIdleTime;
           current.totalTime = totalIdleTime + totalNoIdleTime;
-
           returnVector.emplace_back(current);
       }     
       return returnVector;
@@ -297,7 +290,7 @@ vector<string> LinuxParser::CpuUtilization() {
   sleep(1);
   std::vector<LinuxParser::CpuKPI> currentVector = LinuxParser::CpuUtilPercentage(); 
   vector<std::string> returnCpu;
-  for(int i = 0; i < currentVector.size(); i++) {
+  for(long unsigned int i = 0; i < currentVector.size(); i++) {
       std::ostringstream oCpuStream;
       long totalDelta = currentVector[i].totalTime - previousVector[i].totalTime ;
       long idleDelta = currentVector[i].idleTime - previousVector[i].idleTime ;
@@ -417,7 +410,7 @@ string LinuxParser::User(int pid) {
   std::string uid = Uid(pid);
   std::string userName;
   std::ifstream filestream(kPasswordPath);
-   long runningProcesses = 0;
+
   if (filestream.is_open()) {
       std::string line;
       bool uidFound = false;
@@ -453,7 +446,7 @@ long LinuxParser::UpTime(int pid) {
       linestream >> starttime;
       struct timeval tv;
       gettimeofday(&tv, 0);
-      std::time_t now = std::time(0);
+
       std::time_t elapsedTime = LinuxParser::UpTime() - (starttime/sysconf(_SC_CLK_TCK));
       return elapsedTime;
   }
