@@ -73,8 +73,6 @@ float LinuxParser::MemoryUtilization() {
   long memValue;
   long memTotal = 0;
   long memFree = 0;
-  long memAvailable = 0;
-  long memBuffers;
   string unit;
   std::ifstream filestream(kProcDirectory + kMeminfoFilename);
 
@@ -93,16 +91,6 @@ float LinuxParser::MemoryUtilization() {
             countToRead++;
             continue;
           }      
-          if (key == "MemAvailable:") {
-            memAvailable = memValue;
-            countToRead++;
-            continue;
-          }
-          if (key == "Buffers:") {
-            memBuffers = memValue;
-            countToRead++;
-          }
-
       }
   }
   float memFreeGB = memFree/(1024*1024);
