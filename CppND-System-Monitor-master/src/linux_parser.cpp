@@ -270,6 +270,7 @@ vector<LinuxParser::CpuKPI> LinuxParser::CpuUtilPercentage() {
       }     
       return returnVector;
   }
+  return returnVector;
 }
 
 
